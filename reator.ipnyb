@@ -1,0 +1,108 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyPPtx1+wRPMz52Mvk68nLO5",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/wevertonewald-blip/FCEng/blob/main/reator.ipnyb\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from dataclasses import dataclass\n",
+        "from scipy.integrate import solve_ivp\n",
+        "import numpy as np"
+      ],
+      "metadata": {
+        "id": "e9yhaBoY8qiJ"
+      },
+      "execution_count": 18,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "@dataclass\n",
+        "class paran:\n",
+        "  '''\n",
+        "  Os parametros usados para solucionar o problema do bioreator sao definidos aqui\n",
+        "  Vm=Velocidade maxima de consumo (mg/L)\n",
+        "  Km= Constante de Michaellis (mg/l)\n",
+        "  Ea= Energia de ativação (j/mol)\n",
+        "  R= Constante universal dos gas (j/mol K)\n",
+        "  Tr= Temperatura de referencia (K)\n",
+        "  '''\n",
+        "  Vm: float = 5\n",
+        "  Km: float = 20\n",
+        "  Ea: float = 30000\n",
+        "  R: float = 8,314\n",
+        "  Tr: float = 298,15"
+      ],
+      "metadata": {
+        "id": "4-yI7QDW9VzQ"
+      },
+      "execution_count": 7,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def Vmax(T, paran):\n",
+        "  Vmaximo=paran.Vm*np.exp(-(paran.Ea/paran.R)*((1/T)-(1/paran.Tr)))\n",
+        "  return Vmaximo"
+      ],
+      "metadata": {
+        "id": "YHh3g6Xq-Poa"
+      },
+      "execution_count": 10,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def reator(t,S, T,paran):\n",
+        "  dSdt=-Vmax(T, paran)*(S/(paran.Km+S))\n",
+        "  return dSdt"
+      ],
+      "metadata": {
+        "id": "V_cFrWhC-vDM"
+      },
+      "execution_count": 11,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def simu(t_points, So, T_value, param_instance):\n",
+        "  t_span = [t_points[0], t_points[-1]] # Span of the integration\n",
+        "  sol = solve_ivp(reator, t_span, [So], t_eval=t_points, args=(T_value, param_instance))\n",
+        "  return sol.t, sol.y[0]"
+      ],
+      "metadata": {
+        "id": "XHgVva2G_HNM"
+      },
+      "execution_count": 19,
+      "outputs": []
+    }
+  ]
+}
